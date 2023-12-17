@@ -81,6 +81,9 @@ void setup(void) {
     break;
   }
 
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
+
   Serial.println("");
   delay(100);
 }
@@ -138,6 +141,7 @@ void loop() {
         calculateAverage(avg_a, avg_g);
         Serial.print(avg_a.x); Serial.print(" "); Serial.print(avg_a.y); Serial.print(" "); Serial.println(avg_a.z);
         Serial.print(avg_g.x); Serial.print(" "); Serial.print(avg_g.y); Serial.print(" "); Serial.println(avg_g.z);
+        digitalWrite(13, HIGH);
       }
     } else {
       Serial.print("Acc: "); Serial.print(ax-avg_a.x); Serial.print(", "); Serial.print(ay-avg_a.y); Serial.print(", "); Serial.println(az-avg_a.z);
