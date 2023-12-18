@@ -12,7 +12,10 @@ gyro = np.array([])
 time = 0
 
 fig = plt.figure()
-ax1 = fig.add_subplot(1,1,1)
+fig.suptitle('A tale of 2 subplots')
+
+ax1 = fig.add_subplot(2,1,1)
+ax2 = fig.add_subplot(2,1,2)
 
 def getLengthAndPrint(data):
     temp = data.split(': ')[1].split(', ')
@@ -39,6 +42,13 @@ def animate(i):
 
     ax1.clear()
     ax1.plot(t, acc)
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel("Acceleration (m/s^2)")
+
+    ax2.clear()
+    ax2.plot(t, gyro)
+    ax2.set_xlabel("Time (s)")
+    ax2.set_ylabel("Angular velocity (rad/s)")
 
 ani = animation.FuncAnimation(fig, animate, interval=1000)
 plt.show()
