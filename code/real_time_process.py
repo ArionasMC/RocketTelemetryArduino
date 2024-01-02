@@ -8,45 +8,35 @@ ser = serial.Serial(port='COM4', baudrate=115200, timeout=0.1)
 print(ser.is_open)
 
 acc = np.array([])
-gyro = np.array([[], [], []])
+gyro = np.array([])
 time = 0
-g_time = 0
 
-fig = plt.figure()
-fig.suptitle('A tale of 4 subplots')
+fig1 = plt.figure()
+fig1.suptitle('Acceleration and Angular Velocity lengths')
 
-ax1 = fig.add_subplot(4,1,1)
-ax2 = fig.add_subplot(4,1,2)
-ax3 = fig.add_subplot(4,1,3)
-ax4 = fig.add_subplot(4,1,4)
+ax1 = fig1.add_subplot(2,1,1)
+ax2 = fig1.add_subplot(2,1,2)
 
-def getLengthAndPrint(data):
+def getLength(data):
     temp = data.split(': ')[1].split(', ')
     l = math.sqrt(math.pow(float(temp[0]),2) + math.pow(float(temp[1]),2) + math.pow(float(temp[2]),2))
     print(l)
     return l
 
-def animate(i):
-    global time
-    global g_time
-    global acc
-    global gyro
+def animateFigure1(i):
+    global time, acc, gyro
     data = ser.readline().decode()
     while data:
         if data.startswith('Acc: '):
-            acc = np.append(acc, getLengthAndPrint(data))
+            acc = np.append(acc, getLength(data))
             time = time + 0.5
         elif data.startswith('Gyro: '):
-            temp = data.split(': ')[1].split(', ')
-            print("processing:",temp)
-            gyro = np.c_(gyro, np.array([float(temp[0]), float(temp[1]), float(temp[2])]))
-            print("processed",gyro)
-            g_time = g_time + 0.5
+            gyro = np.append(gyro, getLength(data))
+            time = time + 0.5
         data = ser.readline().decode()
     
     s = len(acc)
     t = np.linspace(0, time, s)
-    gt = np.linspace(0, g_time, len(gyro[0]))
 
     ax1.clear()
     ax1.plot(t, acc)
@@ -54,20 +44,52 @@ def animate(i):
     ax1.set_ylabel("Acceleration (m/s^2)")
 
     ax2.clear()
-    print("gt=",gt,"gyro[0]=",gyro[0])
-    ax2.plot(gt, gyro[0])
+    ax2.plot(t, gyro)
     ax2.set_xlabel("Time (s)")
-    ax2.set_ylabel("Angular velocity x-axis(rad/s)")
+    ax2.set_ylabel("Angular velocity (rad/s)")
 
-    ax3.clear()
-    ax3.plot(gt, gyro[1])
-    ax3.set_xlabel("Time (s)")
-    ax3.set_ylabel("Angular velocity y-axis(rad/s)")
-    
-    ax4.clear()
-    ax4.plot(gt, gyro[2])
-    ax4.set_xlabel("Time (s)")
-    ax4.set_ylabel("Angular velocity z-axis(rad/s)")
+ani = animation.FuncAnimation(fig1, animateFigure1, interval=1000)
 
-ani = animation.FuncAnimation(fig, animate, interval=1000)
+fig2 = plt.figure()
+fig2.suptitle("Angular velocity per axis")
+
+ax_gx = fig2.add_subplot(3,1,1)
+ax_gy = fig2.add_subplot(3,1,2)
+ax_gz = fig2.add_subplot(3,1,3)
+
+gyro_x = np.array([])
+gyro_y = np.array([])
+gyro_z = np.array([])
+time_g = 0
+
+def animateFigure2(i):
+    global gyro_x, gyro_y, gyro_z, time_g
+    data = ser.readline().decode()
+    while data:
+        if data.startswith('Gyro: '):
+            temp = data.split(': ')[1].split(', ')
+            gyro_x = np.append(gyro_x, float(temp[0]))
+            gyro_y = np.append(gyro_y, float(temp[1]))
+            gyro_z = np.append(gyro_z, float(temp[2]))
+            time_g += 0.5
+        data = ser.readline().decode()
+    t = np.linspace(0, time_g, len(gyro_x))
+
+    ax_gx.clear()
+    ax_gx.plot(t, gyro_x)
+    ax_gx.set_xlabel("Time (s)")
+    ax_gx.set_ylabel("Angular velocity x-axis(rad/s)")
+
+    ax_gy.clear()
+    ax_gy.plot(t, gyro_y)
+    ax_gy.set_xlabel("Time (s)")
+    ax_gy.set_ylabel("Angular velocity y-axis(rad/s)")
+
+    ax_gz.clear()
+    ax_gz.plot(t, gyro_z)
+    ax_gz.set_xlabel("Time (s)")
+    ax_gz.set_ylabel("Angular velocity z-axis(rad/s)")
+
+ani2 = animation.FuncAnimation(fig2, animateFigure2, interval=1000)
+
 plt.show()
